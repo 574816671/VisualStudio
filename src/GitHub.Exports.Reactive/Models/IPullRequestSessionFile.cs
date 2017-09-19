@@ -17,6 +17,12 @@ namespace GitHub.Models
     public interface IPullRequestSessionFile : INotifyPropertyChanged
     {
         /// <summary>
+        /// Gets an observable that is raised with a collection of 0-based line numbers when the
+        /// review comments on the file are changed.
+        /// </summary>
+        IObservable<IReadOnlyList<int>> LinesChanged { get; }
+
+        /// <summary>
         /// Gets the SHA of the base commit of the file in the pull request.
         /// </summary>
         string BaseSha { get; }

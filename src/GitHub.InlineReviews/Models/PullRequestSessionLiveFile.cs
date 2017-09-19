@@ -17,8 +17,6 @@ namespace GitHub.InlineReviews.Models
     /// </remarks>
     public sealed class PullRequestSessionLiveFile : PullRequestSessionFile, IPullRequestSessionLiveFile, IDisposable
     {
-        readonly Subject<IReadOnlyList<int>> linesChanged = new Subject<IReadOnlyList<int>>();
-
         public PullRequestSessionLiveFile(
             string relativePath,
             ITextBuffer textBuffer,
@@ -50,9 +48,6 @@ namespace GitHub.InlineReviews.Models
         public ISubject<ITextSnapshot, ITextSnapshot> Rebuild { get; }
 
         /// <inheritdoc/>
-        public IObservable<IReadOnlyList<int>> LinesChanged => linesChanged;
-
-        /// <inheritdoc/>
         public override IReadOnlyList<IInlineCommentThreadModel> InlineCommentThreads
         {
             get { return base.InlineCommentThreads; }
@@ -77,11 +72,5 @@ namespace GitHub.InlineReviews.Models
             ToDispose?.Dispose();
             ToDispose = null;
         }
-
-        /// <summary>
-        /// Raises the <see cref="LinesChanged"/> signal.
-        /// </summary>
-        /// <param name="lines">The lines that have changed.</param>
-        public void NotifyLinesChanged(IReadOnlyList<int> lines) => linesChanged.OnNext(lines);
     }
 }

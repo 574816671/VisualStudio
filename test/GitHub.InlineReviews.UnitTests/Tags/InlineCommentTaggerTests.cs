@@ -131,7 +131,29 @@ namespace GitHub.InlineReviews.UnitTests.Tags
                 Assert.IsType<AddInlineCommentTag>(result[0].Tag);
             }
 
-            static IPullRequestSessionManager CreateSessionManager(bool leftHandSide)
+            [Fact]
+            public void ShouldRaiseTagsChangedOnThreadAddition()
+            {
+                var file = CreateSessionFile();
+                var target = new InlineCommentTagger(
+                    Substitute.For<IGitService>(),
+                    Substitute.For<IGitClient>(),
+                    Substitute.For<IDiffService>(),
+                    Substitute.For<ITextView>(),
+                    Substitute.For<ITextBuffer>(),
+                    CreateSessionManager(file, leftHandSide: false));
+
+                var span = CreateSpan(14);
+                var firstPass = target.GetTags(span);
+                var result = target.GetTags(span).ToList();
+                var raised = false;
+
+                target.TagsChanged += (s, e) => raised = e.Span.Start == 14;
+
+                Assert.True(raised);
+            }
+
+            static IPullRequestSessionFile CreateSessionFile()
             {
                 var diffChunk = new DiffChunk
                 {
@@ -161,6 +183,19 @@ namespace GitHub.InlineReviews.UnitTests.Tags
                 file.Diff.Returns(diff);
                 file.InlineCommentThreads.Returns(threads);
 
+                return file;
+            }
+
+            static IPullRequestSessionManager CreateSessionManager(bool leftHandSide)
+            {
+                var file = CreateSessionFile();
+                return CreateSessionManager(file, leftHandSide);
+            }
+
+            static IPullRequestSessionManager CreateSessionManager(
+                IPullRequestSessionFile file,
+                bool leftHandSide)
+            {
                 var session = Substitute.For<IPullRequestSession>();
                 session.GetFile("file.cs").Returns(file);
 
